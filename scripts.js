@@ -5,25 +5,53 @@ let matches = books
 
 const starting = document.createDocumentFragment()
 
-for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
-    const element = document.createElement('button')
-    element.classList = 'preview'
-    element.setAttribute('data-preview', id)
-
+// Added function for readability and summarising code
+function createBookPreview({ author, id, image, title }) {
+    const element = document.createElement('button');
+    element.classList.add('preview');
+    element.setAttribute('data-preview', id);
+    //added an alt for image 
     element.innerHTML = `
         <img
             class="preview__image"
             src="${image}"
+            alt="${title} cover"
         />
-        
         <div class="preview__info">
             <h3 class="preview__title">${title}</h3>
             <div class="preview__author">${authors[author]}</div>
         </div>
-    `
-
-    starting.appendChild(element)
+    `;
+    
+    return element;
 }
+//This recalls the book when clicked or penws
+for (const book of matches.slice(0, BOOKS_PER_PAGE)) {
+    const previewElement = createBookPreview(book);
+    starting.appendChild(previewElement);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 document.querySelector('[data-list-items]').appendChild(starting)
 

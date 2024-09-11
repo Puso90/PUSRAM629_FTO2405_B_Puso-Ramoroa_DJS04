@@ -32,27 +32,6 @@ for (const book of matches.slice(0, BOOKS_PER_PAGE)) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 document.querySelector('[data-list-items]').appendChild(starting)
 
 const genreHtml = document.createDocumentFragment()
@@ -67,6 +46,10 @@ for (const [id, name] of Object.entries(genres)) {
     element.innerText = name
     genreHtml.appendChild(element)
 }
+
+
+
+
 
 document.querySelector('[data-search-genres]').appendChild(genreHtml)
 
@@ -96,7 +79,7 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 }
 
 document.querySelector('[data-list-button]').innerText = `Show more (${books.length - BOOKS_PER_PAGE})`
-document.querySelector('[data-list-button]').disabled = (matches.length - (page * BOOKS_PER_PAGE)) > 0
+document.querySelector('[data-list-button]').active = (matches.length - (page * BOOKS_PER_PAGE)) > 0
 
 document.querySelector('[data-list-button]').innerHTML = `
     <span>Show more</span>

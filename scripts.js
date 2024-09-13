@@ -206,16 +206,16 @@ document.querySelector('[data-list-button]').addEventListener('click', () => {
 });
 
 document.querySelector('[data-list-items]').addEventListener('click', (event) => {
-    const pathArray = Array.from(event.path || event.composedPath());
+    const bookArray = Array.from(event.path || event.composedPath());
     let active = null;
-
-    for (const book of pathArray) {
+// added personalisation to reduce confusion and added readability
+    for (const specificBook of bookArray) {
         if (active) break;
 
-        if (node?.dataset?.preview) {
+        if (specificBook?.dataset?.preview) {
             // Re-organized syntax style from iterative style to FUNCTIONAL Style - ADDED*
             // This looks for the book that matches the ID and brings back or returns it.
-            active = books.find(book => book.id === node?.dataset?.preview);
+            active = books.find(book => book.id === specificBook?.dataset?.preview);
         }
     }
     

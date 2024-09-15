@@ -2,13 +2,29 @@ import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 
 
 /**
- * @typedef {object} Filters - Noticed filters are assigned with 'any' and should be filtering correctly books from objects, there's only one "Religion" book in genres
+ * @typedef {object} Filters - Noticed filters are assigned with 'any' and should be filtering correctly books from objects
  * 
  */
 
 
 let page = 1;
 let matches = books;
+
+const listItems = document.querySelector('[data-list-items]');
+const searchOverlay = document.querySelector('[data-search-overlay]');
+const settingsOverlay = document.querySelector('[data-settings-overlay]');
+const listMessage = document.querySelector('[data-list-message]');
+const listButton = document.querySelector('[data-list-button]');
+const searchGenres = document.querySelector('[data-search-genres]');
+const searchAuthors = document.querySelector('[data-search-authors]');
+const settingsForm = document.querySelector('[data-settings-form]');
+const searchForm = document.querySelector('[data-search-form]');
+const listActive = document.querySelector('[data-list-active]');
+const listBlur = document.querySelector('[data-list-blur]');
+const listImage = document.querySelector('[data-list-image]');
+const listTitle = document.querySelector('[data-list-title]');
+const listSubtitle = document.querySelector('[data-list-subtitle]');
+const listDescription = document.querySelector('[data-list-description]');
 
 const starting = document.createDocumentFragment();
 
@@ -40,15 +56,44 @@ function createBookPreview({ author, id, image, title }) {
 
 // Initialize book previews
 // So this is to show the books upon entry to webpage
-function previewElements() {
-    for (const book of matches.slice(0, BOOKS_PER_PAGE)) {
-        const previewElement = createBookPreview(book);
-        starting.appendChild(previewElement);
+class BookPreviewManager {
+    constructor(matches, booksPerPage, container) {
+        this.matches = matches;
+        this.booksPerPage = booksPerPage;
+        this.container = container;
     }
-document.querySelector('[data-list-items]').appendChild(starting);
 
-} 
-previewElements() //calling back function - Somehow this always confuses me!!
+    previewElements() {
+        const starting = this.createContainer();
+        this.matches.slice(0, this.booksPerPage).forEach(book => {
+            const previewElement = this.createBookPreview(book);
+            starting.appendChild(previewElement);
+        });
+        this.container.appendChild(starting);
+    }
+
+    createContainer() {
+        const container = document.createElement('div'); // Adjust as necessary
+        container.classList.add('starting'); // Add classes if needed
+        return container;
+    }
+
+    createBookPreview(book) {
+        const previewElement = document.createElement('div'); // Adjust as necessary
+        previewElement.textContent = book.title; // Adjust based on book properties
+        // Add more details about the book if needed
+        return previewElement;
+    }
+}
+
+// Usage:
+const match = [/* array of books */];
+const BOOKS_PER_PAGE = 10; // Define your constant
+const listItem = document.getElementById('list-items'); // Your container element
+
+const bookPreviewManager = new BookPreviewManager(matches, BOOKS_PER_PAGE, listItems);
+bookPreviewManager.previewElements();
+ //calling back function - Somehow this always confuses me!!
 
 
 // Create and store genre options
@@ -67,7 +112,7 @@ for (const [id, name] of Object.entries(genres)) {
     genreElements[id] = element;  // Store element with genre id as key - *ADDED
 }
 
-document.querySelector('[data-search-genres]').appendChild(genreHtml);
+searchGenres.appendChild(genreHtml);
 
 // Create and store author options
 const authorsHtml = document.createDocumentFragment();
@@ -83,7 +128,7 @@ for (const [id, name] of Object.entries(authors)) {
     authorsHtml.appendChild(element);
     authorElements[id] = element;  // Store element with author id as key - ADDED*
 }
-document.querySelector('[data-search-authors]').appendChild(authorsHtml);
+searchAuthors.appendChild(authorsHtml);
 }
 optionsGenre() //These callBack functions are a MASSIVE headache because I do not fully understand them
 
@@ -106,11 +151,11 @@ themes(); // Pretty straight forward and works without complications
 
 function updateShowMoreButton() {
     const remaining = matches.length - (page * BOOKS_PER_PAGE);
-    document.querySelector('[data-list-button]').innerHTML = `
+    listButton.innerHTML = `
         <span>Show more</span>
         <span class="list__remaining"> (${remaining > 0 ? remaining : 0})</span>
     `;
-    document.querySelector('[data-list-button]').disabled = remaining < 1;
+    listButton.disabled = remaining < 1;
 }
 // Show more button now gets updated with number of books left to show
 updateShowMoreButton();
@@ -118,31 +163,31 @@ updateShowMoreButton();
 
 // Event listeners for overlays and form submissions
 function overlays() {
-document.querySelector('[data-search-cancel]').addEventListener('click', () => {
-    document.querySelector('[data-search-overlay]').open = false;
-});
+    document.querySelector('[data-search-cancel]').addEventListener('click', () => {
+        searchOverlay.open = false;
+    });
 
-document.querySelector('[data-settings-cancel]').addEventListener('click', () => {
-    document.querySelector('[data-settings-overlay]').open = false;
-});
+    document.querySelector('[data-settings-cancel]').addEventListener('click', () => {
+        settingsOverlay.open = false;
+    });
 
-document.querySelector('[data-header-search]').addEventListener('click', () => {
-    document.querySelector('[data-search-overlay]').open = true;
-    document.querySelector('[data-search-title]').focus();
-});
+    document.querySelector('[data-header-search]').addEventListener('click', () => {
+        searchOverlay.open = true;
+        document.querySelector('[data-search-title]').focus();
+    });
 
-document.querySelector('[data-header-settings]').addEventListener('click', () => {
-    document.querySelector('[data-settings-overlay]').open = true;
-});
+    document.querySelector('[data-header-settings]').addEventListener('click', () => {
+        settingsOverlay.open = true;
+    });
 
-document.querySelector('[data-list-close]').addEventListener('click', () => {
-    document.querySelector('[data-list-active]').open = false;
-});
+    document.querySelector('[data-list-close]').addEventListener('click', () => {
+        listActive.open = false;
+    });
 } 
 overlays()
 
-function settingsForm() {
-    document.querySelector('[data-settings-form]').addEventListener('submit', (event) => {
+function settingsForms() {
+    settingsForm.addEventListener('submit', (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
         const { theme } = Object.fromEntries(formData);
@@ -155,12 +200,12 @@ function settingsForm() {
             document.documentElement.style.setProperty('--color-light', '255, 255, 255');
         }
         
-        document.querySelector('[data-settings-overlay]').open = false;
-});
-} settingsForm()
+        settingsOverlay.open = false;
+    });
+} settingsForms()
 
 function dataSearch() {
-document.querySelector('[data-search-form]').addEventListener('submit', (event) => {
+    searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const filters = Object.fromEntries(formData);
@@ -187,12 +232,12 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
     matches = result;
 
     if (result.length < 1) {
-        document.querySelector('[data-list-message]').classList.add('list__message_show');
+        listMessage.classList.add('list__message_show');
     } else {
-        document.querySelector('[data-list-message]').classList.remove('list__message_show');
+        listMessage.classList.remove('list__message_show');
     }
 
-    document.querySelector('[data-list-items]').innerHTML = '';
+    listItems.innerHTML = '';
     const newItems = document.createDocumentFragment();
 
     for (const { author, id, image, title } of result.slice(0, BOOKS_PER_PAGE)) {
@@ -205,17 +250,17 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
         }
     }
 
-    document.querySelector('[data-list-items]').appendChild(newItems);
+    listItems.appendChild(newItems);
     // Show more button now gets updated with number of books left to show
     updateShowMoreButton();
 
     window.scrollTo({top: 0, behavior: 'smooth'});
-    document.querySelector('[data-search-overlay]').open = false;
+    searchOverlay.open = false;
 });
 } dataSearch()
 
-function listButton() {
-document.querySelector('[data-list-button]').addEventListener('click', () => {
+function listButtons() {
+    listButton.addEventListener('click', () => {
     const fragment = document.createDocumentFragment();
 
     for (const { author, id, image, title } of matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE)) {
@@ -228,37 +273,37 @@ document.querySelector('[data-list-button]').addEventListener('click', () => {
         }
     }
 
-    document.querySelector('[data-list-items]').appendChild(fragment);
+    listItems.appendChild(fragment);
     page += 1;
     // Show more button now gets updated with number of books left to show
     updateShowMoreButton(); 
 });
-} listButton()
+} listButtons()
 
 function findBooks() {
-document.querySelector('[data-list-items]').addEventListener('click', (event) => {
-    const bookArray = Array.from(event.path || event.composedPath());
-    let active = null;
-// added personalisation to reduce confusion and added readability
-    for (const specificBook of bookArray) {
-        if (active) break;
+    listItems.addEventListener('click', (event) => {
+        const bookArray = Array.from(event.path || event.composedPath());
+        let active = null;
+        // added personalisation to reduce confusion and added readability
+        for (const specificBook of bookArray) {
+            if (active) break;
 
-        if (specificBook?.dataset?.preview) {
-            // Re-organized syntax style from iterative style to FUNCTIONAL Style - ADDED*
-            // This looks for the book that matches the ID and brings back or returns it.
-            active = books.find(book => book.id === specificBook?.dataset?.preview);
+            if (specificBook?.dataset?.preview) {
+                // Re-organized syntax style from iterative style to FUNCTIONAL Style - ADDED*
+                // This looks for the book that matches the ID and brings back or returns it.
+                active = books.find(book => book.id === specificBook?.dataset?.preview);
+            }
         }
-    }
-    
-    if (active) {
-        document.querySelector('[data-list-active]').open = true;
-        document.querySelector('[data-list-blur]').src = active.image;
-        document.querySelector('[data-list-image]').src = active.image;
-        document.querySelector('[data-list-title]').innerText = active.title;
-        document.querySelector('[data-list-subtitle]').innerText = `${authors[active.author]} (${new Date(active.published).getFullYear()})`;
-        document.querySelector('[data-list-description]').innerText = active.description;
-    }
-});
+        
+        if (active) {
+            listActive.open = true;
+            listBlur.src = active.image;
+            listImage.src = active.image;
+            listTitle.innerText = active.title;
+            listSubtitle.innerText = `${authors[active.author]} (${new Date(active.published).getFullYear()})`;
+            listDescription.innerText = active.description;
+        }
+    });
 
 } findBooks()
 

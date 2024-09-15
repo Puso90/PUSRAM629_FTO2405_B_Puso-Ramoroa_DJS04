@@ -1,5 +1,12 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 
+
+/**
+ * @typedef {object} Filters - Noticed filters are assigned with 'any' and should be filtering correctly books from objects, there's only one "Religion" book in genres
+ * 
+ */
+
+
 let page = 1;
 let matches = books;
 
@@ -32,14 +39,20 @@ function createBookPreview({ author, id, image, title }) {
 }
 
 // Initialize book previews
-for (const book of matches.slice(0, BOOKS_PER_PAGE)) {
-    const previewElement = createBookPreview(book);
-    starting.appendChild(previewElement);
-}
-
+// So this is to show the books upon entry to webpage
+function previewElements() {
+    for (const book of matches.slice(0, BOOKS_PER_PAGE)) {
+        const previewElement = createBookPreview(book);
+        starting.appendChild(previewElement);
+    }
 document.querySelector('[data-list-items]').appendChild(starting);
 
+} 
+previewElements() //calling back function - Somehow this always confuses me!!
+
+
 // Create and store genre options
+function optionsGenre() {
 const genreHtml = document.createDocumentFragment();
 const firstGenreElement = document.createElement('option');
 firstGenreElement.value = 'any';
@@ -70,10 +83,13 @@ for (const [id, name] of Object.entries(authors)) {
     authorsHtml.appendChild(element);
     authorElements[id] = element;  // Store element with author id as key - ADDED*
 }
-
 document.querySelector('[data-search-authors]').appendChild(authorsHtml);
+}
+optionsGenre() //These callBack functions are a MASSIVE headache because I do not fully understand them
+
 
 // Set initial theme
+function themes() {
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.querySelector('[data-settings-theme]').value = 'night';
     document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
@@ -83,6 +99,10 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
     document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
     document.documentElement.style.setProperty('--color-light', '255, 255, 255');
 }
+
+} 
+themes(); // Pretty straight forward and works without complications
+
 
 function updateShowMoreButton() {
     const remaining = matches.length - (page * BOOKS_PER_PAGE);
@@ -95,7 +115,9 @@ function updateShowMoreButton() {
 // Show more button now gets updated with number of books left to show
 updateShowMoreButton();
 
+
 // Event listeners for overlays and form submissions
+function overlays() {
 document.querySelector('[data-search-cancel]').addEventListener('click', () => {
     document.querySelector('[data-search-overlay]').open = false;
 });
@@ -116,23 +138,28 @@ document.querySelector('[data-header-settings]').addEventListener('click', () =>
 document.querySelector('[data-list-close]').addEventListener('click', () => {
     document.querySelector('[data-list-active]').open = false;
 });
+} 
+overlays()
 
-document.querySelector('[data-settings-form]').addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const { theme } = Object.fromEntries(formData);
+function settingsForm() {
+    document.querySelector('[data-settings-form]').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const { theme } = Object.fromEntries(formData);
 
-    if (theme === 'night') {
-        document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
-        document.documentElement.style.setProperty('--color-light', '10, 10, 20');
-    } else {
-        document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
-        document.documentElement.style.setProperty('--color-light', '255, 255, 255');
-    }
-    
-    document.querySelector('[data-settings-overlay]').open = false;
+        if (theme === 'night') {
+            document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
+            document.documentElement.style.setProperty('--color-light', '10, 10, 20');
+        } else {
+            document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
+            document.documentElement.style.setProperty('--color-light', '255, 255, 255');
+        }
+        
+        document.querySelector('[data-settings-overlay]').open = false;
 });
+} settingsForm()
 
+function dataSearch() {
 document.querySelector('[data-search-form]').addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -140,7 +167,7 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
     const result = [];
 
     for (const book of books) {
-        let genreMatch = filters.genre === 'any';
+        let genreMatch = filters.genre === 'Religion';
 
         for (const singleGenre of book.genres) {
             if (genreMatch) break;
@@ -185,7 +212,9 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
     window.scrollTo({top: 0, behavior: 'smooth'});
     document.querySelector('[data-search-overlay]').open = false;
 });
+} dataSearch()
 
+function listButton() {
 document.querySelector('[data-list-button]').addEventListener('click', () => {
     const fragment = document.createDocumentFragment();
 
@@ -204,7 +233,9 @@ document.querySelector('[data-list-button]').addEventListener('click', () => {
     // Show more button now gets updated with number of books left to show
     updateShowMoreButton(); 
 });
+} listButton()
 
+function findBooks() {
 document.querySelector('[data-list-items]').addEventListener('click', (event) => {
     const bookArray = Array.from(event.path || event.composedPath());
     let active = null;
@@ -228,3 +259,20 @@ document.querySelector('[data-list-items]').addEventListener('click', (event) =>
         document.querySelector('[data-list-description]').innerText = active.description;
     }
 });
+
+} findBooks()
+
+
+
+/*___________________________________________________________________________________________________________________________________________________________
+// COMMENTS & NOTES:
+
+    1.  Show more button now interactive with number of books showing and to reveal
+    2.  There's only one religious book in the genre object - BOOM Ephifany! 
+    3.
+
+
+
+
+
+___________________________________________________________________________________________________________________________________________________________*/

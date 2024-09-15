@@ -56,44 +56,15 @@ function createBookPreview({ author, id, image, title }) {
 
 // Initialize book previews
 // So this is to show the books upon entry to webpage
-class BookPreviewManager {
-    constructor(matches, booksPerPage, container) {
-        this.matches = matches;
-        this.booksPerPage = booksPerPage;
-        this.container = container;
+function previewElements() {
+    for (const book of matches.slice(0, BOOKS_PER_PAGE)) {
+        const previewElement = createBookPreview(book);
+        starting.appendChild(previewElement);
     }
+listItems.appendChild(starting);
 
-    previewElements() {
-        const starting = this.createContainer();
-        this.matches.slice(0, this.booksPerPage).forEach(book => {
-            const previewElement = this.createBookPreview(book);
-            starting.appendChild(previewElement);
-        });
-        this.container.appendChild(starting);
-    }
-
-    createContainer() {
-        const container = document.createElement('div'); // Adjust as necessary
-        container.classList.add('starting'); // Add classes if needed
-        return container;
-    }
-
-    createBookPreview(book) {
-        const previewElement = document.createElement('div'); // Adjust as necessary
-        previewElement.textContent = book.title; // Adjust based on book properties
-        // Add more details about the book if needed
-        return previewElement;
-    }
-}
-
-// Usage:
-const match = [/* array of books */];
-const BOOKS_PER_PAGE = 10; // Define your constant
-const listItem = document.getElementById('list-items'); // Your container element
-
-const bookPreviewManager = new BookPreviewManager(matches, BOOKS_PER_PAGE, listItems);
-bookPreviewManager.previewElements();
- //calling back function - Somehow this always confuses me!!
+} 
+previewElements() //calling back function - Somehow this always confuses me!!
 
 
 // Create and store genre options

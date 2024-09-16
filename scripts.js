@@ -1,4 +1,6 @@
-import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
+import { Book } from './book.js';
+import { books, authors, genres, BOOKS_PER_PAGE } from './data.js';
+
 
 
 /**
@@ -33,7 +35,34 @@ const bookElements = {};
 const authorElements = {};
 const genreElements = {};
 
-// Create and store book preview elements
+
+/*
+function createBookPreview(bookData) {
+    // new book inheritance ADDED here*
+    const book = new Book(bookData);
+    const element = document.createElement('button');
+    element.classList.add('preview');
+    element.setAttribute('data-preview', book.id);
+    element.innerHTML = `
+        <img
+            class="preview__image"
+            src="${book.image}"
+            alt="${book.title} cover"
+        />
+        <div class="preview__info">
+            <h3 class="preview__title">${book.title}</h3>
+            <div class="preview__author">${book.getAuthorName()}</div>
+        </div>
+    `;
+    
+    bookElements[book.id] = element;  // Store element with book id as key
+    return element;
+}
+*/
+
+
+
+// older code without inheritance
 function createBookPreview({ author, id, image, title }) {
     const element = document.createElement('button');
     element.classList.add('preview');
@@ -54,6 +83,8 @@ function createBookPreview({ author, id, image, title }) {
     return element;
 }
 
+
+
 // Initialize book previews
 // So this is to show the books upon entry to webpage
 function previewElements() {
@@ -69,11 +100,11 @@ previewElements() //calling back function - Somehow this always confuses me!!
 
 // Create and store genre options
 function optionsGenre() {
-const genreHtml = document.createDocumentFragment();
-const firstGenreElement = document.createElement('option');
-firstGenreElement.value = 'any';
-firstGenreElement.innerText = 'All Genres';
-genreHtml.appendChild(firstGenreElement);
+    const genreHtml = document.createDocumentFragment();
+    const firstGenreElement = document.createElement('option');
+    firstGenreElement.value = 'any';
+    firstGenreElement.innerText = 'All Genres';
+    genreHtml.appendChild(firstGenreElement);
 
 for (const [id, name] of Object.entries(genres)) {
     const element = document.createElement('option');
@@ -81,16 +112,16 @@ for (const [id, name] of Object.entries(genres)) {
     element.innerText = name;
     genreHtml.appendChild(element);
     genreElements[id] = element;  // Store element with genre id as key - *ADDED
-}
+    }
 
 searchGenres.appendChild(genreHtml);
 
 // Create and store author options
-const authorsHtml = document.createDocumentFragment();
-const firstAuthorElement = document.createElement('option');
-firstAuthorElement.value = 'any';
-firstAuthorElement.innerText = 'All Authors';
-authorsHtml.appendChild(firstAuthorElement);
+    const authorsHtml = document.createDocumentFragment();
+    const firstAuthorElement = document.createElement('option');
+    firstAuthorElement.value = 'any';
+    firstAuthorElement.innerText = 'All Authors';
+    authorsHtml.appendChild(firstAuthorElement);
 
 for (const [id, name] of Object.entries(authors)) {
     const element = document.createElement('option');
@@ -98,8 +129,8 @@ for (const [id, name] of Object.entries(authors)) {
     element.innerText = name;
     authorsHtml.appendChild(element);
     authorElements[id] = element;  // Store element with author id as key - ADDED*
-}
-searchAuthors.appendChild(authorsHtml);
+    }
+    searchAuthors.appendChild(authorsHtml);
 }
 optionsGenre() //These callBack functions are a MASSIVE headache because I do not fully understand them
 
@@ -175,6 +206,35 @@ function settingsForms() {
     });
 } settingsForms()
 
+//__________________________________________________________________________________________________________________________
+// Modifications below:
+/*
+function dataSearch() {
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const filters = Object.fromEntries(formData);
+        const result = [];
+
+        for (const bookData of books) {
+            // The inheritance is here
+            const book = new Book(bookData);
+//Here I added filters.id after === to match genre to the genres specific ID
+            let genreMatch = filters.genre === filters.id;
+            for (const singleGenre of book.genres) {
+                if (genreMatch) break;
+                if (singleGenre === filters.genre) { genreMatch = true; }
+            }
+
+            if (
+                (filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase())) &&
+                (filters.author === 'any' || book.author === filters.author) &&
+                genreMatch
+            ) {
+                result.push(book);
+            }
+        }*/
+
 function dataSearch() {
     searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -183,7 +243,8 @@ function dataSearch() {
     const result = [];
 
     for (const book of books) {
-        let genreMatch = filters.genre === 'Religion';
+        //Here I added filters.id after === to match genre to the genres specific ID
+        let genreMatch = filters.genre === filters.id;
 
         for (const singleGenre of book.genres) {
             if (genreMatch) break;
@@ -199,12 +260,45 @@ function dataSearch() {
         }
     }
 
-    page = 1;
-    matches = result;
+//__________________________________________________________________________________________________________________________
+// Modifications pt2 continue:
+
+/*
+page = 1;
+matches = result;
+
+if (result.length < 1) {
+    listMessage.classList.add('list__message_show');
+} else {
+    listMessage.classList.remove('list__message_show');
+}
+
+listItems.innerHTML = '';
+const newItems = document.createDocumentFragment();
+
+for (const book of result.slice(0, BOOKS_PER_PAGE)) {
+    if (!bookElements[book.id]) {
+        const element = createBookPreview(book);
+        newItems.appendChild(element);
+    } else {
+        newItems.appendChild(bookElements[book.id]);
+    }
+}
+
+listItems.appendChild(newItems);
+    updateShowMoreButton();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    searchOverlay.open = false;
+    });
+}
+*/
+
+page = 1;
+matches = result;
 
     if (result.length < 1) {
         listMessage.classList.add('list__message_show');
-    } else {
+        } else {
         listMessage.classList.remove('list__message_show');
     }
 
@@ -227,8 +321,40 @@ function dataSearch() {
 
     window.scrollTo({top: 0, behavior: 'smooth'});
     searchOverlay.open = false;
-});
-} dataSearch()
+    });
+} 
+
+dataSearch()
+
+
+
+
+//___________________________________________________________________________________________________________________________
+
+
+
+/*
+function listButtons() {
+    listButton.addEventListener('click', () => {
+        const fragment = document.createDocumentFragment();
+
+        for (const bookData of matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE)) {
+            const book = new Book(bookData);
+
+            if (!bookElements[book.id]) {
+                const element = createBookPreview(book);
+                fragment.appendChild(element);
+            } else {
+                fragment.appendChild(bookElements[book.id]);
+            }
+        }
+
+        listItems.appendChild(fragment);
+        page += 1;
+        updateShowMoreButton();
+    });
+} */
+
 
 function listButtons() {
     listButton.addEventListener('click', () => {
@@ -249,7 +375,50 @@ function listButtons() {
     // Show more button now gets updated with number of books left to show
     updateShowMoreButton(); 
 });
-} listButtons()
+} 
+
+listButtons()
+
+//__________________________________________________________________________________________________________________________
+// Modifications continue:
+
+/*
+function findBooks() {
+    listItems.addEventListener('click', (event) => {
+        const bookArray = Array.from(event.path || event.composedPath());
+        let active = null;
+        for (const specificBook of bookArray) {
+            if (active) break;
+
+            if (specificBook?.dataset?.preview) {
+                active = books.find(book => book.id === specificBook?.dataset?.preview);
+                if (active) {
+                    active = new Book(active);
+                }
+            }
+        }
+        
+        if (active) {
+            listActive.open = true;
+            listBlur.src = active.image;
+            listImage.src = active.image;
+            listTitle.innerText = active.title;
+            listSubtitle.innerText = `${active.getAuthorName()} (${active.getPublishedYear()})`;
+            listDescription.innerText = active.description;
+        }
+    });
+}
+
+*/
+
+
+
+
+
+
+//_______________________________________________________________________________________________________________________
+
+
 
 function findBooks() {
     listItems.addEventListener('click', (event) => {
@@ -276,7 +445,10 @@ function findBooks() {
         }
     });
 
-} findBooks()
+}
+    findBooks()
+
+
 
 
 
